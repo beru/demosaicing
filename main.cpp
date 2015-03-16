@@ -7,8 +7,8 @@
 #include "ReadImage\File.h"
 #include "test.h"
 
-#define WIDTH 5796
-#define HEIGHT 3734
+#define WIDTH 3900
+#define HEIGHT 2616
 
 uint16_t values[WIDTH*HEIGHT];
 

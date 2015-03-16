@@ -12,20 +12,27 @@ struct Pixel
 
 void test(size_t width, size_t height, const uint16_t* image)
 {
-	std::vector<uint16_t> work(width * height);
-	uint16_t* pWork = &work[0];
-
-	for (size_t y=0; y<height; ++y) {
-		for (size_t x=0; x<width; ++x) {
-			size_t idx = y * width + x;
-			pWork[idx] = image[idx] > 53220 ? -1 : 0;
-		}
-	}	
+	//std::vector<uint16_t> work0(width * (height + 2));
+	//uint16_t* pWork = &work0[0];
+	//float scales[] = {
+	//	10.3566284,
+	//	4.44606495,
+	//	5.27747297,
+	//	4.44606495,
+	//};
+	//for (size_t i=0; i<height; ++i) {
+	//	for (size_t j=0; j<width; ++j) {
+	//		int tmp = image[i*width+j] - 1023;
+	//		int scale_idx = ((i & 1) * 2) + (j & 1); 
+	//		tmp *= scales[scale_idx];
+	//		pWork[i*width+j] = tmp;
+	//	}
+	//}
 	
 	{
 		std::vector<uint32_t> work(width * height);
 		uint32_t* pColor = &work[0];
-		demosaic_grbg(image, width, height, pColor);
+		demosaic_grbg(image+width, width, height, pColor);
 		int hoge = 0;
 	}
 	

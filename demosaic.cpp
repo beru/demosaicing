@@ -47,6 +47,10 @@ void demosaic_grbg(
 	;
 	const size_t nShifts = 8;
 
+	// g r g r g r
+	// b g b g b g
+	// g r g r g r
+	// b g b g b g
 	for (size_t y=1; y<height-1; y+=2) {
 		ul = pUp[0]; uc = pUp[1]; ur = pUp[2];
 		ml = pMi[0]; mc = pMi[1]; mr = pMi[2];
@@ -94,7 +98,7 @@ void demosaic_grbg(
 			mr2 = pMi[x + 2];
 			lr2 = pLo[x + 2];
 			
-			r = (ml + mr + 1) >> (1 + nShifts);
+			r = (mc + mr2 + 1) >> (1 + nShifts);
 			g = mr >> nShifts;
 			b = (ur + lr + 1) >> (1 + nShifts);
 			pColor[x + 1] = r | (g << 8) | (b << 16); 
