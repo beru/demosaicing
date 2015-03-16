@@ -156,12 +156,14 @@ void cuda_demosaic_grbg(
 	cudaError_t ret;
 Timer t;
 
+	uint32_t* h_dst;
+	ret = cudaMallocHost((void**)&h_dst, width*height*sizeof(uchar4));
 	ret = cudaMalloc((void**)&d_src, width*height*sizeof(ushort1));
 	ret = cudaMalloc((void**)&d_dst, width*height*sizeof(uchar4));
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
 	ret = cudaMemcpy(d_src, pSrc, width*height*sizeof(ushort1), cudaMemcpyHostToDevice);
-	ret = cudaMemcpy(d_dst, pDst, width*height*sizeof(uint32_t), cudaMemcpyHostToDevice);
+//	ret = cudaMemcpy(d_dst, pDst, width*height*sizeof(uint32_t), cudaMemcpyHostToDevice);
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
 
@@ -176,9 +178,11 @@ t.Start();
 	demosaic<<<numBlocksInAGrid,numThreadsInABlock>>>(d_src, width, height, d_dst);
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
-	ret = cudaMemcpy(pDst, d_dst, width*height*sizeof(uchar4), cudaMemcpyDeviceToHost);
+	ret = cudaMemcpy(h_dst, d_dst, width*height*sizeof(uchar4), cudaMemcpyDeviceToHost);
+	//ret = cudaMemcpy(pDst, d_dst, width*height*sizeof(uchar4), cudaMemcpyDeviceToHost);
 printf("Elapsed %f\n", t.ElapsedSecond());
 
 	ret = cudaFree(d_src);
 	ret = cudaFree(d_dst);
+	ret = cudaFreeHost(h_dst);
 }
