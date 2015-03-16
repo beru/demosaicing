@@ -23,12 +23,13 @@ void demosaic(
 	i = threadIdx.x;
 
 //	int total = gridDim.x * blockDim.x;
-	if ((d_part_length * (1 + threadIdx.x) - 1) >= width) {
+	if (((threadIdx.x + 1) * 16 - 1) >= width) {
 		return;
 	}
 
-	pSrc += threadIdx.x * d_part_length;
-	pDst += threadIdx.x * d_part_length;
+	size_t offset = threadIdx.x * 2;
+	pSrc += offset;
+	pDst += offset;
 	pSrc += width * blockIdx.x;
 	pDst += width * (blockIdx.x + 1) + 1;
 
@@ -37,47 +38,28 @@ void demosaic(
 	// g r g r g r
 	// b g b g b g
 	const int nShifts = 8;
-	uint16_t
-		ul, uc, ur, urr,
-		ml, mc, mr, mrr,
-		ll, lc, lr, lrr
-	;
 	if (blockIdx.x == 0) {
 		for (size_t y=0; y<height; y+=2) {
 			const uint16_t* pUp = pSrc;
 			const uint16_t* pMi = pSrc + width;
 			const uint16_t* pLo = pSrc + 2 * width;
 			uchar4* pDst0 = pDst;
-						uc = pUp[1];
-			ml = pMi[0]; mc = pMi[1]; mr = pMi[2];
-						lc = pLo[1]; lr = pLo[2];
-			for (size_t x=0; x<d_part_length; x+=2) {
-				urr = pUp[3];
-				mrr = pMi[3];
-				lrr = pLo[3];
-
-				uint32_t r0 = uc + lc + 1;
+			for (size_t x=0; x<16; x+=2) {
+				uint32_t r0 = pUp[1] + pLo[1] + 1;
 				pDst0->x = r0 >> (1 + nShifts);
-				pDst0->y = mc >> nShifts;
-				pDst0->z = (ml + mr + 1) >> (1 + nShifts);
+				pDst0->y = pMi[1] >> nShifts;
+				pDst0->z = (pMi[0] + pMi[2] + 1) >> (1 + nShifts);
 				++pDst0;
 
-				pDst0->x = (r0 + urr + lrr + 1) >> (2 + nShifts);
-				pDst0->y = (mc + mrr + 1) >> (1 + nShifts);
-				pDst0->z = mr >> nShifts;
+				pDst0->x = (r0 + pUp[3] + pLo[3] + 1) >> (2 + nShifts);
+				pDst0->y = (pMi[1] + pMi[3] + 1) >> (1 + nShifts);
+				pDst0->z = pMi[2] >> nShifts;
 				++pDst0;
 
-				ml = mr;
-				ll = lr;
-				uc = urr;
-				mc = mrr;
-				lc = lrr;
-				mr = pMi[4];
-				lr = pLo[4];
-
-				pUp += 2;
-				pMi += 2;
-				pLo += 2;
+				pUp += 16;
+				pMi += 16;
+				pLo += 16;
+				pDst0 += 14;
 			}
 			pSrc += width * 2;
 			pDst += width * 2;
@@ -88,34 +70,21 @@ void demosaic(
 			const uint16_t* pMi = pSrc + width;
 			const uint16_t* pLo = pSrc + 2 * width;
 			uchar4* pDst0 = pDst;
-			ul = pUp[0]; uc = pUp[1]; ur = pUp[2];
-			ml = pMi[0]; mc = pMi[1]; mr = pMi[2];
-			ll = pLo[0]; lc = pLo[1]; lr = pLo[2];
-			for (size_t x=0; x<d_part_length; x+=2) {
-				mrr = pMi[3];
-				pDst0->x = mc >> nShifts;
-				pDst0->y = (uc + ml + mr + lc + 2) >> (2 + nShifts);
-				pDst0->z = (ul + ur + ll + lr + 2) >> (2 + nShifts);
+			for (size_t x=0; x<16; x+=2) {
+				pDst0->x = pMi[1] >> nShifts;
+				pDst0->y = (pUp[1] + pMi[0] + pMi[2] + pLo[1] + 2) >> (2 + nShifts);
+				pDst0->z = (pUp[0] + pUp[2] + pLo[0] + pLo[2] + 2) >> (2 + nShifts);
 				++pDst0;
 
-				pDst0->x = (mc + mrr + 1) >> (1 + nShifts);
-				pDst0->y = mr >> nShifts;
-				pDst0->z = (ur + lr + 1) >> (1 + nShifts);
+				pDst0->x = (pMi[1] + pMi[3] + 1) >> (1 + nShifts);
+				pDst0->y = pMi[2] >> nShifts;
+				pDst0->z = (pUp[2] + pLo[2] + 1) >> (1 + nShifts);
 				++pDst0;
 
-				ul = ur;
-				ml = mr;
-				ll = lr;
-				uc = pUp[3];
-				mc = mrr;
-				lc = pLo[3];
-				ur = pUp[4];
-				mr = pMi[4];
-				lr = pLo[4];
-
-				pUp += 2;
-				pMi += 2;
-				pLo += 2;
+				pUp += 16;
+				pMi += 16;
+				pLo += 16;
+				pDst0 += 14;
 			}
 			pSrc += width * 2;
 			pDst += width * 2;
@@ -141,12 +110,12 @@ Timer t;
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
 	ret = cudaMemcpy(d_src, pSrc, width*height*sizeof(ushort1), cudaMemcpyHostToDevice);
-//	ret = cudaMemcpy(d_dst, pDst, width*height*sizeof(uint32_t), cudaMemcpyHostToDevice);
+	ret = cudaMemcpy(d_dst, pDst, width*height*sizeof(uint32_t), cudaMemcpyHostToDevice);
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
 
 	int numBlocksInAGrid = 2;
-	int numThreadsInABlock = 512;
+	int numThreadsInABlock = 256;
 
 	int len = (width / numThreadsInABlock + 1) & ~1;
 
