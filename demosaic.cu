@@ -176,6 +176,7 @@ t.Start();
 
 t.Start();
 	demosaic<<<numBlocksInAGrid,numThreadsInABlock>>>(d_src, width, height, d_dst);
+	cudaThreadSynchronize();
 printf("Elapsed %f\n", t.ElapsedSecond());
 t.Start();
 	ret = cudaMemcpy(h_dst, d_dst, width*height*sizeof(uchar4), cudaMemcpyDeviceToHost);
