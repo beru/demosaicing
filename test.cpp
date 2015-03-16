@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "demosaic.h"
+#include "Timer.h"
 
 struct Pixel
 {
@@ -34,11 +35,13 @@ void test(size_t width, size_t height, const uint16_t* image)
 		uint32_t* pColor = &work[0];
 
 #if 0
+		Timer t;
 		demosaic_grbg(image+width, width, height, pColor);
+		printf("Elapsed %f\n", t.ElapsedSecond());
 #else
 		cuda_demosaic_grbg(image+width, width, height-1, pColor);
 #endif
-
+		printf("%p\n", pColor);
 		int hoge = 0;
 	}
 	
