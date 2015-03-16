@@ -9,3 +9,9 @@ void demosaic_grbg(
 	uint32_t* pDst
 );
 
+void cuda_demosaic_grbg(
+	const uint16_t* pSrc,
+	size_t width,
+	size_t height,
+	uint32_t* pDst
+);
