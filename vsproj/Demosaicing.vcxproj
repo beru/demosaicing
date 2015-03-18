@@ -71,6 +71,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -80,9 +81,12 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <CudaCompile>
-      <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" -Xptxas -dlcm=ca --source-in-ptx %(AdditionalOptions)</AdditionalOptions>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <CudaRuntime>Static</CudaRuntime>
+      <Keep>true</Keep>
+      <CodeGeneration>compute_50,sm_50</CodeGeneration>
+      <CInterleavedPTX>true</CInterleavedPTX>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

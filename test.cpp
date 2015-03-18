@@ -33,7 +33,7 @@ void test(size_t width, size_t height, const uint16_t* image)
 	{
 		std::vector<uint32_t> work(width * height);
 		uint32_t* pColor = &work[0];
-
+		printf("%d %d %p\n", width, height, pColor);
 #if 0
 		Timer t;
 		demosaic_grbg(image+width, width, height, pColor);
@@ -41,7 +41,8 @@ void test(size_t width, size_t height, const uint16_t* image)
 #else
 		cuda_demosaic_grbg(image+width, width, height-1, pColor);
 #endif
-		printf("%p\n", pColor);
+		printf("%d %d %p\n", width, height, pColor);
+
 		int hoge = 0;
 	}
 	
